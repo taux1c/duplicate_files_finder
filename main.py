@@ -12,19 +12,16 @@ starting_path = r"." # Path to the folder you want to check
 duplicates_folder = r"./duplicates" # Path to the folder you want to move duplicates to.
 logfile = r"" # Path to the log file
 system_duplicate_log = r"./system_duplicate_log.log" # Path to the file where duplicate information is kept for recovery.
-notification_on = True
+notifications_on = True
 logs_on = True
 
 
 # DO NOT EDIT BELOW THIS LINE
 
 
-system_duplicate_log = pahtlib.Path(system_duplicate_log)
+system_duplicate_log = pathlib.Path(system_duplicate_log)
 log_file = pathlib.Path(logfile)
-if log_file.exists():
-    dt = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
-    notifiy("Log file exists, renaming it to {}.log".format(dt), True)
-    shutil.move(log_file, log_file.parent / (log_file.stem + dt + log_file.suffix))
+
 
 
 p = pathlib.Path(starting_path)
@@ -38,17 +35,28 @@ def notify(message, log=False):
         print(message)
     if logs_on:
         with open(log_file, "a") as f:
-            f.write(message + "
+            f.write(message + """
 
-")
+""")
 
 def duplicate(f,hash):
-    notify("{} is unique, adding hash to library.".format(f), False)
-    with open(system_duplicate_log, "a") as lf:
-        lf.write("{}:{}".format(f, hash) + "
+    if f == system_duplicate_log or f == log_file:
+        return
+    notify("{} is duplicate, moving it to duplicates folder".format(f), False)
 
-")
-    shutil.move(f, duplicates_folder)
+    try:
+        shutil.move(f, duplicates_folder)
+    except Exception as e:
+        notify("Error moving file: " + str(e), True)
+        notify("Trying to rename file and move it to duplicates folder.", True)
+        try:
+            dt = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+            shutil.move(f, duplicates_folder / (f.name + " - " + dt))
+            notify("File renamed to {} and moved to duplicates folder.".format(f.name + " - " + dt), True)
+        except Exception as e:
+            notify("Error moving file: " + str(e) + """"
+                                                    
+                                                    Move failed!""", True)
 
 def main():
 
@@ -67,7 +75,7 @@ def main():
             duplicate(f, hash)
         else:
             hashes[hash] = f
-
+    notify("Done!", False)
 
 
 def subfolder(folder):
@@ -86,9 +94,12 @@ def subfolder(folder):
                 notify("{} is unique, adding hash to library.".format(file), False)
                 hashes[hash] = file
 
+# DO NOT PLACE FUNCTIONS BELOW THIS LINE
 
-
-
+if log_file.exists():
+    dt = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+    notify("Log file exists, renaming it to {}.log".format(dt), True)
+    shutil.move(log_file, log_file.parent / (log_file.stem + dt + log_file.suffix))
 
 if __name__ == "__main__":
     main()
