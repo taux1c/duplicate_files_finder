@@ -2,10 +2,30 @@ import hashlib
 import pathlib
 import concurrent.futures
 import shutil
+from datetime import datetime
+
+# DO NOT EDIT ABOVE THIS LINE
+
+
 
 starting_path = r"" # Path to the folder you want to check
 duplicates_folder = r"" # Path to the folder you want to move duplicates to.
-output_messages = False
+logfile = r"" # Path to the log file
+system_duplicate_log = r"./system_duplicate_log.log" # Path to the file where duplicate information is kept for recovery.
+notification_on = True
+logs_on = True
+
+
+# DO NOT EDIT BELOW THIS LINE
+
+
+system_duplicate_log = pahtlib.Path(system_duplicate_log)
+log_file = pathlib.Path(logfile)
+if log_file.exists():
+    dt = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+    notifiy("Log file exists, renaming it to {}.log".format(dt), True)
+    shutil.move(log_file, log_file.parent / (log_file.stem + dt + log_file.suffix))
+
 
 p = pathlib.Path(starting_path)
 duplicates_folder = pathlib.Path(duplicates_folder)
@@ -13,6 +33,22 @@ hashes = {}
 if not duplicates_folder.is_dir():
     duplicates_folder.mkdir(parents=True, exist_ok=True)
 
+def notify(message, log=False):
+    if notifications_on:
+        print(message)
+    if logs_on:
+        with open(log_file, "a") as f:
+            f.write(message + "
+
+")
+
+def duplicate(f,hash):
+    notify("{} is unique, adding hash to library.".format(f), False)
+    with open(system_duplicate_log, "a") as lf:
+        lf.write("{}:{}".format(file, hash) + "
+
+")
+    shutil.move(f, duplicates_folder)
 
 def main():
 
@@ -24,16 +60,12 @@ def main():
         executor.map(subfolder, folders)
     # Check for duplicates
     for f in files:
-        if output_messages:
-            print("Hashing file: ",str(f))
+        notify("Hashing file: " + str(f), False)
         hash = hashlib.sha256(f.read_bytes()).hexdigest()
+        notify("Checking to see if {} is in the library.".format(f), False)
         if hash in hashes:
-            if output_messages:
-                print("{} is a duplicate of {}".format(f, hashes[hash]))
-            shutil.move(f, duplicates_folder)
+            duplicate(f, hash)
         else:
-            if output_messages:
-                print("{} is unique, adding hash to library.".format(f))
             hashes[hash] = f
 
 
@@ -47,9 +79,11 @@ def subfolder(folder):
     for file in files:
         with file.read_bytes():
             hash = hashlib.sha256().hexdigest()
+            notify("Checking to see if {} is in the library.".format(file), False)
             if hash in hashes:
-                shutil.move(file, duplicates_folder)
+                duplicate(file, hash)
             else:
+                notify("{} is unique, adding hash to library.".format(file), False)
                 hashes[hash] = file
 
 
