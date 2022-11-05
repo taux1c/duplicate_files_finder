@@ -46,6 +46,8 @@ def duplicate(f,hash):
 
     try:
         shutil.move(f, duplicates_folder)
+        with open(system_duplicate_log, "a") as f:
+            f.write("{}:{}".format(hash,f)
     except Exception as e:
         notify("Error moving file: " + str(e), True)
         notify("Trying to rename file and move it to duplicates folder.", True)
@@ -53,10 +55,13 @@ def duplicate(f,hash):
             dt = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
             shutil.move(f, duplicates_folder / (f.name + " - " + dt))
             notify("File renamed to {} and moved to duplicates folder.".format(f.name + " - " + dt), True)
+            with open(system_duplicate_log, "a") as f:
+                f.write("{}:{}".format(hash, f)
         except Exception as e:
             notify("Error moving file: " + str(e) + """"
                                                     
                                                     Move failed!""", True)
+
 
 def main():
 
@@ -100,6 +105,8 @@ if log_file.exists():
     dt = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
     notify("Log file exists, renaming it to {}.log".format(dt), True)
     shutil.move(log_file, log_file.parent / (log_file.stem + dt + log_file.suffix))
+else:
+    log_file.touch()
 
 if __name__ == "__main__":
     main()
