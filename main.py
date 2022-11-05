@@ -9,9 +9,9 @@ from datetime import datetime
 
 
 starting_path = r"." # Path to the folder you want to check
-duplicates_folder = r"./duplicates" # Path to the folder you want to move duplicates to.
-logfile = r"" # Path to the log file
-system_duplicate_log = r"./system_duplicate_log.log" # Path to the file where duplicate information is kept for recovery.
+duplicates_folder = r"" # Path to the folder you want to move duplicates to.
+logfile = r"./duplicates_finder.log" # Path to the log file
+system_duplicate_log = r"./system_duplicate_move.log" # Path to the file where duplicate information is kept for recovery.
 notifications_on = True
 logs_on = True
 
@@ -47,7 +47,7 @@ def duplicate(f,hash):
     try:
         shutil.move(f, duplicates_folder)
         with open(system_duplicate_log, "a") as f:
-            f.write("{}:{}".format(hash,f)
+            f.write("{}:{}".format(hash,f))
     except Exception as e:
         notify("Error moving file: " + str(e), True)
         notify("Trying to rename file and move it to duplicates folder.", True)
@@ -56,7 +56,7 @@ def duplicate(f,hash):
             shutil.move(f, duplicates_folder / (f.name + " - " + dt))
             notify("File renamed to {} and moved to duplicates folder.".format(f.name + " - " + dt), True)
             with open(system_duplicate_log, "a") as f:
-                f.write("{}:{}".format(hash, f)
+                f.write("{}:{}".format(hash, f))
         except Exception as e:
             notify("Error moving file: " + str(e) + """"
                                                     
