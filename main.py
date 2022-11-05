@@ -8,8 +8,8 @@ from datetime import datetime
 
 
 
-starting_path = r"" # Path to the folder you want to check
-duplicates_folder = r"" # Path to the folder you want to move duplicates to.
+starting_path = r"." # Path to the folder you want to check
+duplicates_folder = r"./duplicates" # Path to the folder you want to move duplicates to.
 logfile = r"" # Path to the log file
 system_duplicate_log = r"./system_duplicate_log.log" # Path to the file where duplicate information is kept for recovery.
 notification_on = True
@@ -45,7 +45,7 @@ def notify(message, log=False):
 def duplicate(f,hash):
     notify("{} is unique, adding hash to library.".format(f), False)
     with open(system_duplicate_log, "a") as lf:
-        lf.write("{}:{}".format(file, hash) + "
+        lf.write("{}:{}".format(f, hash) + "
 
 ")
     shutil.move(f, duplicates_folder)
