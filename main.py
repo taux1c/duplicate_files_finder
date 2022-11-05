@@ -5,6 +5,7 @@ import shutil
 
 starting_path = r"" # Path to the folder you want to check
 duplicates_folder = r"" # Path to the folder you want to move duplicates to.
+output_messages = False
 
 p = pathlib.Path(starting_path)
 duplicates_folder = pathlib.Path(duplicates_folder)
@@ -23,13 +24,16 @@ def main():
         executor.map(subfolder, folders)
     # Check for duplicates
     for f in files:
-        print("Hashing file: ",str(f))
+        if output_messages:
+            print("Hashing file: ",str(f))
         hash = hashlib.sha256(f.read_bytes()).hexdigest()
         if hash in hashes:
-            print("{} is a duplicate of {}".format(f, hashes[hash]))
+            if output_messages:
+                print("{} is a duplicate of {}".format(f, hashes[hash]))
             shutil.move(f, duplicates_folder)
         else:
-            print("{} is unique, adding hash to library.".format(f))
+            if output_messages:
+                print("{} is unique, adding hash to library.".format(f))
             hashes[hash] = f
 
 
